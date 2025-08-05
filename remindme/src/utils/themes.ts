@@ -83,6 +83,8 @@ export const themes: Record<string, AppTheme> = {
   },
 };
 
+const CUSTOM_THEMES_KEY = 'remindme_custom_themes';
+
 export const applyTheme = (theme: AppTheme, comicSansMode: boolean = false): void => {
   const root = document.documentElement;
   
@@ -111,20 +113,105 @@ export const applyTheme = (theme: AppTheme, comicSansMode: boolean = false): voi
   }
 };
 
-export const loadThemeFromURL = async (url: string): Promise<AppTheme | null> => {
+export const validateTheme = (themeData: any): boolean => {
+  return (
+    themeData &&
+    typeof themeData.id === 'string' &&
+    typeof themeData.name === 'string' &&
+    themeData.colors &&
+    typeof themeData.colors.primary === 'string' &&
+    typeof themeData.colors.secondary === 'string' &&
+    typeof themeData.colors.background === 'string' &&
+    typeof themeData.colors.surface === 'string' &&
+    typeof themeData.colors.text === 'string' &&
+    typeof themeData.colors.accent === 'string' &&
+    themeData.fonts &&
+    typeof themeData.fonts.primary === 'string' &&
+    typeof themeData.fonts.secondary === 'string'
+  );
+};
+
+export const loadThemeFromURL = async (url: string): Promise<{ success: boolean; theme?: AppTheme; error?: string }> => {
   try {
+    // Validate URL format
+    const urlPattern = /^https?:\/\/.+/;
+    if (!urlPattern.test(url)) {
+      return { success: false, error: 'Please provide a valid HTTP/HTTPS URL' };
+    }
+
     const response = await fetch(url);
+    
+    if (!response.ok) {
+      return { success: false, error: `Failed to fetch theme: ${response.status} ${response.statusText}` };
+    }
+
     const themeData = await response.json();
     
-    // Validate theme structure
-    if (themeData.id && themeData.name && themeData.colors && themeData.fonts) {
-      return themeData as AppTheme;
+    if (!validateTheme(themeData)) {
+      return { success: false, error: 'Invalid theme format. Please check the theme structure.' };
     }
-    return null;
+
+    // Ensure unique ID for custom themes
+    const customTheme: AppTheme = {
+      ...themeData,
+      id: `custom_${Date.now()}_${themeData.id}`,
+    };
+
+    return { success: true, theme: customTheme };
   } catch (error) {
     console.error('Failed to load theme from URL:', error);
-    return null;
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to load theme from URL' 
+    };
   }
+};
+
+export const saveCustomTheme = (theme: AppTheme): void => {
+  const customThemes = getCustomThemes();
+  customThemes[theme.id] = theme;
+  localStorage.setItem(CUSTOM_THEMES_KEY, JSON.stringify(customThemes));
+};
+
+export const getCustomThemes = (): Record<string, AppTheme> => {
+  const data = localStorage.getItem(CUSTOM_THEMES_KEY);
+  return data ? JSON.parse(data) : {};
+};
+
+export const removeCustomTheme = (themeId: string): void => {
+  const customThemes = getCustomThemes();
+  delete customThemes[themeId];
+  localStorage.setItem(CUSTOM_THEMES_KEY, JSON.stringify(customThemes));
+};
+
+export const getAllThemes = (): Record<string, AppTheme> => {
+  return { ...themes, ...getCustomThemes() };
+};
+
+export const getThemeById = (themeId: string): AppTheme | null => {
+  const allThemes = getAllThemes();
+  return allThemes[themeId] || null;
+};
+
+// Example theme JSON structure for users
+export const getExampleThemeJSON = (): string => {
+  return JSON.stringify({
+    id: "my_awesome_theme",
+    name: "🎨 My Awesome Theme",
+    colors: {
+      primary: "#FF6B6B",
+      secondary: "#4ECDC4", 
+      background: "#FFFFFF",
+      surface: "#F8F9FA",
+      text: "#2C3E50",
+      accent: "#E74C3C"
+    },
+    fonts: {
+      primary: "Arial, sans-serif",
+      secondary: "Georgia, serif"
+    },
+    customCSS: "/* Optional custom CSS */ .special-button { border-radius: 20px; }"
+  }, null, 2);
 };
 
 export const getEmojiTags = (): string[] => [
