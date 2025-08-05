@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Reminder, UserSettings } from './types';
 import { ReminderForm } from './components/ReminderForm';
 import { ThemeManager } from './components/ThemeManager';
+import { AIAssistant } from './components/AIAssistant';
+import { GoogleCalendarSync } from './components/GoogleCalendarSync';
+import { ReminderSharing } from './components/ReminderSharing';
+import { QuickActions } from './components/QuickActions';
 import { saveReminders, loadReminders } from './utils/storage';
 import { applyTheme, getThemeById, themes } from './utils/themes';
 import { requestNotificationPermission, scheduleNotification } from './utils/notifications';
-import { Plus, Settings, Palette, Bell, Search, Filter, Calendar, CheckCircle, Edit, Trash2, Volume2 } from 'lucide-react';
+import { Plus, Settings, Palette, Bell, Search, Filter, Calendar, CheckCircle, Edit, Trash2, Volume2, Bot, Share2, Zap, Mic, Camera, X } from 'lucide-react';
 import { format, isToday, isTomorrow, isPast } from 'date-fns';
 
 function App() {
@@ -13,7 +17,11 @@ function App() {
   const [showForm, setShowForm] = useState(false);
   const [showThemeManager, setShowThemeManager] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showGoogleCalendar, setShowGoogleCalendar] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
+  const [sharingReminder, setSharingReminder] = useState<Reminder | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPriority, setFilterPriority] = useState<'all' | 'low' | 'medium' | 'high'>('all');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'completed'>('all');
@@ -113,6 +121,40 @@ function App() {
     setShowForm(false);
   };
 
+  const handleCreateReminderFromAI = (reminderData: Partial<Reminder>) => {
+    const now = new Date();
+    const newReminder: Reminder = {
+      title: reminderData.title || 'New Reminder',
+      description: reminderData.description || '',
+      dueDate: reminderData.dueDate || new Date(),
+      priority: reminderData.priority || 'medium',
+      colorTag: reminderData.colorTag || '#3b82f6',
+      emojiTag: reminderData.emojiTag || '⭐',
+      isCompleted: false,
+      isRecurring: reminderData.isRecurring || false,
+      recurringType: reminderData.recurringType,
+      recurringInterval: reminderData.recurringInterval,
+      notificationEnabled: reminderData.notificationEnabled ?? true,
+      youtubeSound: reminderData.youtubeSound,
+      voiceMemo: reminderData.voiceMemo,
+      photos: reminderData.photos,
+      sharedWith: reminderData.sharedWith,
+      id: `reminder_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: now,
+      updatedAt: now,
+    };
+    
+    const updatedReminders = [...reminders, newReminder];
+    setReminders(updatedReminders);
+    saveReminders(updatedReminders);
+  };
+
+  const handleImportReminders = (importedReminders: Reminder[]) => {
+    const updatedReminders = [...reminders, ...importedReminders];
+    setReminders(updatedReminders);
+    saveReminders(updatedReminders);
+  };
+
   const handleDeleteReminder = (id: string) => {
     if (window.confirm('Are you sure you want to delete this reminder? 🗑️')) {
       const updatedReminders = reminders.filter(r => r.id !== id);
@@ -206,6 +248,24 @@ function App() {
             
             <div className="flex items-center gap-2">
               <button
+                onClick={() => setShowAIAssistant(true)}
+                className="btn-secondary flex items-center gap-2"
+                title="AI Assistant"
+              >
+                <Bot size={20} />
+                <span className="hidden sm:inline">{settings.aiAssistant.name}</span>
+              </button>
+
+              <button
+                onClick={() => setShowQuickActions(true)}
+                className="btn-secondary flex items-center gap-2"
+                title="Quick Actions"
+              >
+                <Zap size={20} />
+                <span className="hidden sm:inline">Quick</span>
+              </button>
+              
+              <button
                 onClick={() => setShowThemeManager(true)}
                 className="btn-secondary flex items-center gap-2"
                 title="Themes"
@@ -284,12 +344,20 @@ function App() {
                   : 'Create your first reminder to get started! ✨'}
               </p>
               {!searchTerm && filterPriority === 'all' && filterStatus === 'all' && (
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="btn-fun"
-                >
-                  Create First Reminder 🚀
-                </button>
+                <div className="flex gap-4 justify-center">
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="btn-fun"
+                  >
+                    Create First Reminder 🚀
+                  </button>
+                  <button
+                    onClick={() => setShowQuickActions(true)}
+                    className="btn-secondary"
+                  >
+                    Quick Actions ⚡
+                  </button>
+                </div>
               )}
             </div>
           ) : (
@@ -395,6 +463,14 @@ function App() {
                     >
                       <CheckCircle size={20} />
                     </button>
+
+                    <button
+                      onClick={() => setSharingReminder(reminder)}
+                      className="p-2 rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200 transition-all"
+                      title="Share reminder"
+                    >
+                      <Share2 size={20} />
+                    </button>
                     
                     <button
                       onClick={() => {
@@ -444,6 +520,30 @@ function App() {
         />
       )}
 
+      {showAIAssistant && (
+        <AIAssistant
+          assistant={settings.aiAssistant}
+          reminders={reminders}
+          onCreateReminder={handleCreateReminderFromAI}
+          onUpdateReminder={(id, updates) => {
+            const updatedReminders = reminders.map(r => 
+              r.id === id ? { ...r, ...updates, updatedAt: new Date() } : r
+            );
+            setReminders(updatedReminders);
+            saveReminders(updatedReminders);
+          }}
+          onDeleteReminder={handleDeleteReminder}
+          onClose={() => setShowAIAssistant(false)}
+        />
+      )}
+
+      {showQuickActions && (
+        <QuickActions
+          onCreateReminder={handleCreateReminderFromAI}
+          onClose={() => setShowQuickActions(false)}
+        />
+      )}
+
       {showThemeManager && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="card-fun max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -462,6 +562,21 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {showGoogleCalendar && (
+        <GoogleCalendarSync
+          reminders={reminders}
+          onImportReminders={handleImportReminders}
+          onClose={() => setShowGoogleCalendar(false)}
+        />
+      )}
+
+      {sharingReminder && (
+        <ReminderSharing
+          reminder={sharingReminder}
+          onClose={() => setSharingReminder(null)}
+        />
       )}
 
       {showSettings && (
@@ -543,6 +658,21 @@ function App() {
                       placeholder="friendly and helpful"
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Avatar Emoji:</label>
+                    <input
+                      type="text"
+                      value={settings.aiAssistant.avatar}
+                      onChange={(e) => handleSettingChange('aiAssistant', {
+                        ...settings.aiAssistant,
+                        avatar: e.target.value
+                      })}
+                      className="input-field"
+                      placeholder="🤖"
+                      maxLength={2}
+                    />
+                  </div>
                 </div>
               </div>
               
@@ -558,6 +688,16 @@ function App() {
                     />
                     <span className="text-lg">📅 Google Calendar Sync</span>
                   </label>
+                  
+                  <button
+                    onClick={() => {
+                      setShowSettings(false);
+                      setShowGoogleCalendar(true);
+                    }}
+                    className="btn-secondary ml-8"
+                  >
+                    Configure Calendar Sync
+                  </button>
                   
                   <label className="flex items-center gap-3">
                     <input
