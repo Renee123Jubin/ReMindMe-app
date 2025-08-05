@@ -1,27 +1,251 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Default theme colors */
+  --color-primary: #FFB6C1;
+  --color-secondary: #DDA0DD;
+  --color-background: #FFF0F5;
+  --color-surface: #F0F8FF;
+  --color-text: #8B008B;
+  --color-accent: #98FB98;
+  
+  /* Default fonts */
+  --font-primary: "Quicksand", sans-serif;
+  --font-secondary: "Poppins", sans-serif;
+}
+
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-primary);
+    transition: all 0.3s ease;
+  }
+  
+  * {
+    transition: color 0.3s ease, background-color 0.3s ease;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 shadow-lg;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--color-secondary);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
   }
   
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+    @apply font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 shadow-md;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 2px solid var(--color-primary);
+  }
+  
+  .btn-secondary:hover {
+    background-color: var(--color-primary);
+    color: white;
+  }
+  
+  .btn-fun {
+    @apply font-bold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-110 focus:outline-none shadow-xl;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+    color: white;
+    font-size: 1.2rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    border: 3px solid white;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
   }
   
   .card {
-    @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+    @apply rounded-2xl shadow-xl p-6 border-2 transition-all duration-300 hover:shadow-2xl;
+    background-color: var(--color-surface);
+    border-color: var(--color-primary);
+  }
+  
+  .card-fun {
+    @apply rounded-3xl shadow-2xl p-8 border-4 transition-all duration-300 hover:shadow-3xl transform hover:-translate-y-2;
+    background: linear-gradient(135deg, var(--color-surface), white);
+    border-color: var(--color-accent);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card-fun::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.5s;
+    opacity: 0;
+  }
+  
+  .card-fun:hover::before {
+    opacity: 1;
+    animation: shimmer 1.5s ease-in-out;
+  }
+  
+  @keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200;
+    @apply w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-offset-2 transition-all duration-300 text-lg;
+    border-color: var(--color-primary);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-secondary);
+  }
+  
+  .input-field:focus {
+    border-color: var(--color-accent);
+    background-color: white;
+    transform: scale(1.02);
+  }
+  
+  .emoji-picker {
+    @apply grid grid-cols-6 gap-2 p-4 bg-white rounded-2xl shadow-xl border-2 max-h-48 overflow-y-auto;
+    border-color: var(--color-primary);
+  }
+  
+  .emoji-option {
+    @apply w-10 h-10 flex items-center justify-center text-2xl rounded-xl transition-all duration-200 hover:scale-125 cursor-pointer;
+    background-color: var(--color-surface);
+  }
+  
+  .emoji-option:hover {
+    background-color: var(--color-accent);
+    transform: scale(1.25) rotate(10deg);
+  }
+  
+  .color-picker {
+    @apply grid grid-cols-5 gap-3 p-4;
+  }
+  
+  .color-option {
+    @apply w-12 h-12 rounded-full border-4 border-white shadow-lg cursor-pointer transition-all duration-200 hover:scale-125;
+  }
+  
+  .color-option.selected {
+    @apply ring-4 ring-offset-2;
+    ring-color: var(--color-primary);
+    transform: scale(1.2);
+  }
+  
+  .reminder-item {
+    @apply rounded-2xl p-6 shadow-lg border-l-8 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1;
+    background-color: var(--color-surface);
+  }
+  
+  .reminder-priority-high {
+    @apply border-l-red-500 bg-red-50;
+  }
+  
+  .reminder-priority-medium {
+    @apply border-l-yellow-500 bg-yellow-50;
+  }
+  
+  .reminder-priority-low {
+    @apply border-l-green-500 bg-green-50;
+  }
+  
+  .quick-action-button {
+    @apply fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-white text-2xl font-bold transition-all duration-300 transform hover:scale-110 z-50;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    animation: bounce 3s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+    40%, 43% { transform: translate3d(0,-15px,0); }
+    70% { transform: translate3d(0,-7px,0); }
+    90% { transform: translate3d(0,-2px,0); }
+  }
+  
+  .simple-mode {
+    font-size: 1.25rem;
+  }
+  
+  .simple-mode .btn-primary,
+  .simple-mode .btn-secondary {
+    @apply py-6 px-12 text-2xl;
+  }
+  
+  .simple-mode .input-field {
+    @apply py-4 px-6 text-xl;
+  }
+  
+  .simple-mode .card {
+    @apply p-8;
+  }
+  
+  .large-text {
+    font-size: 1.5rem;
+  }
+  
+  .large-text .btn-primary,
+  .large-text .btn-secondary {
+    @apply py-8 px-16 text-3xl;
+  }
+  
+  .large-text .input-field {
+    @apply py-6 px-8 text-2xl;
+  }
+  
+  .comic-sans {
+    font-family: "Comic Sans MS", cursive !important;
+  }
+  
+  .comic-sans * {
+    font-family: "Comic Sans MS", cursive !important;
+  }
+  
+  /* Fun animations */
+  .wiggle {
+    animation: wiggle 1s ease-in-out infinite;
+  }
+  
+  @keyframes wiggle {
+    0%, 7% { transform: rotateZ(0); }
+    15% { transform: rotateZ(-15deg); }
+    20% { transform: rotateZ(10deg); }
+    25% { transform: rotateZ(-10deg); }
+    30% { transform: rotateZ(6deg); }
+    35% { transform: rotateZ(-4deg); }
+    40%, 100% { transform: rotateZ(0); }
+  }
+  
+  .rainbow-text {
+    background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff0080);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbow 3s ease-in-out infinite;
+  }
+  
+  @keyframes rainbow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 }
