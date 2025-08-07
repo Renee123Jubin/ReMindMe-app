@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Reminder } from '../types';
-import { Calendar, Download, Upload, Sync, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { Calendar, Download, Upload, RefreshCw, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface GoogleCalendarSyncProps {
@@ -354,7 +354,7 @@ export const GoogleCalendarSync: React.FC<GoogleCalendarSyncProps> = ({
             {/* Sync Options */}
             <div className="card bg-gray-50">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Sync size={20} />
+                <RefreshCw size={20} />
                 Auto-Sync Options
               </h3>
               

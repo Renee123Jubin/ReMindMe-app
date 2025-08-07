@@ -9,7 +9,7 @@ import { QuickActions } from './components/QuickActions';
 import { saveReminders, loadReminders } from './utils/storage';
 import { applyTheme, getThemeById, themes } from './utils/themes';
 import { requestNotificationPermission, scheduleNotification } from './utils/notifications';
-import { Plus, Settings, Palette, Bell, Search, Filter, Calendar, CheckCircle, Edit, Trash2, Volume2, Bot, Share2, Zap, Mic, Camera, X } from 'lucide-react';
+import { Plus, Settings, Palette, Bell, Search, Filter, Calendar, CheckCircle, Edit, Trash2, Volume2, Bot, Share2, Zap, Mic, Camera, X, Clock } from 'lucide-react';
 import { format, isToday, isTomorrow, isPast } from 'date-fns';
 
 function App() {
